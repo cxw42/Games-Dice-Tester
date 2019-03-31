@@ -10,7 +10,7 @@ our $VERSION = '0.000001';  # TRIAL
 our (@EXPORT, @EXPORT_OK, %EXPORT_TAGS);
 BEGIN {
     @EXPORT = ();
-    @EXPORT_OK = qw(chi_squared_test chi_squared_maybe_ok);
+    @EXPORT_OK = qw(chi_squared chi_squared_test chi_squared_maybe_ok);
     %EXPORT_TAGS = (
         default => [@EXPORT],
         all => [@EXPORT, @EXPORT_OK]
@@ -29,14 +29,11 @@ Games::Dice::Tester - Statistical tests of random-dice-rolling programs
 
 =head1 SYNOPSIS
 
-Quick summary of what the module does.
+Various statistical tests for use with dice-rolling programs.
 
-Perhaps a little code snippet.
+=head1 WHAT THIS MODULE IS NOT
 
-    use Games::Dice::Tester;
-
-    my $foo = Games::Dice::Tester->new();
-    ...
+A way to tell you whether your random-number generator is truly random!
 
 =head1 EXPORT
 
@@ -49,12 +46,11 @@ listed below.
 
 # }}}1
 
-=head2 chi_squared_test
+=head2 chi_squared
 
-Return the probability that a given observed distribution was produced by a
-random process with the given expected distribution.  Usage:
+Compute the chi-squared statistic V.  Usage:
 
-    my $prob = chi_squared_test(observed=>[...], expected=>[...]);
+    my ($chi_squared, $df) = chi_squared_test(observed=>[...], expected=>[...]);
 
 where the C<observed> and C<expected> arrays are the number of occurrences
 in each category.
@@ -62,6 +58,65 @@ in each category.
 As a shorthand for the common case of a fair die, you can pass a scalar for
 C<expected>.  The C<expected> array will then be filled with copies of that
 value equal in number to the size of the C<observed> array.
+
+As yet another alternative, you can call
+
+    my ($chi_squared, $df) = chi_squared_test(generator=>sub { ... });
+
+where C<generator>, when called, returns the next C<($observed, $expected)>
+pair.  When the generator returns C<undef>, the loop stops.
+
+Returns the chi-squared statistic.  In list context, also returns
+the number of degrees of freedom.
+
+Original version by L< Lukas
+Atkinson|https://stackoverflow.com/users/1521179/amon>, posted
+L<here|https://stackoverflow.com/a/21205042/2877364>.  Modified by CXW.
+
+=cut
+
+sub chi_squared {
+    my %args = @_;
+    my ($observed, $expected, $generator);
+
+    if($args{generator}) {
+        croak "Generator must be a coderef" unless ref $args{generator} eq 'CODE';
+        $generator = delete $args{generator};
+        croak 'Generator must be the only parameter' if scalar keys %args;
+
+    } else {
+        my $idx = 0;
+        $observed = delete $args{observed} // croak q(Argument "observed" required);
+        $expected = delete $args{expected} // croak q(Argument "expected" required);
+        $generator = sub { ++$idx; ($observed->[$idx-1], $expected->[$idx-1]) };
+
+        # Shorthand syntax for $expected
+        $expected = [($expected) x @$observed] unless ref $expected eq 'ARRAY';
+
+        # Validate parameters
+        @$observed == @$expected or croak q(Input arrays must have same length);
+    }
+
+    # Do the work
+    my $count = 0;
+    my $chi_squared;
+    while(1) {
+        my ($obs, $exp) = $generator->();
+        last unless defined $obs;
+        ++$count;
+        $chi_squared += ($obs - $exp)**2 / $exp;
+    }
+
+    my $degrees_of_freedom = $count - 1;
+
+    return wantarray ? ($chi_squared, $degrees_of_freedom) : $chi_squared;
+} #chi_squared()
+
+=head2 chi_squared_test
+
+Return the probability that a given observed distribution was produced by a
+random process with the given expected distribution.  Parameters are as
+L</chi_squared>.
 
 If I am reading Knuth correctly, a random sequence should generally have
 probabilities on the range (0.1, 0.9).  TAOCP 3e, vol. 2, p. 47.
@@ -73,23 +128,9 @@ L<here|https://stackoverflow.com/a/21205042/2877364>.  Modified by CXW.
 =cut
 
 sub chi_squared_test {
-  my %args = @_;
-  my $observed = delete $args{observed} // croak q(Argument "observed" required);
-  my $expected = delete $args{expected} // croak q(Argument "expected" required);
-
-  # Shorthand syntax for $expected
-  $expected = [($expected) x @$observed] unless ref $expected eq 'ARRAY';
-
-  # Validate parameters
-  @$observed == @$expected or croak q(Input arrays must have same length);
-
-  # Do the work
-  my $chi_squared = sum map {
-    ($observed->[$_] - $expected->[$_])**2 / $expected->[$_];
-  } 0 .. $#$observed;
-  my $degrees_of_freedom = @$observed - 1;
-  my $probability = chisqrprob($degrees_of_freedom, $chi_squared);
-  return $probability;
+    my ($chi_squared, $degrees_of_freedom) = chi_squared(@_);
+    my $probability = chisqrprob($degrees_of_freedom, $chi_squared);
+    return $probability;
 } #chi_squared_test()
 
 =head2 chi_squared_maybe_ok

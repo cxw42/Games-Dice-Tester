@@ -2,14 +2,11 @@
 
 
 
-Quick summary of what the module does.
+Various statistical tests for use with dice-rolling programs.
 
-Perhaps a little code snippet.
+# WHAT THIS MODULE IS NOT
 
-    use Games::Dice::Tester;
-
-    my $foo = Games::Dice::Tester->new();
-    ...
+A way to tell you whether your random-number generator is truly random!
 
 # EXPORT
 
@@ -18,18 +15,50 @@ listed below.
 
 # FUNCTIONS
 
-## chi\_squared\_test
+## chi\_squared
 
-Return the probability that a given observed distribution was produced by a
-random process with the given expected distribution.  Usage:
+Compute the chi-squared statistic V.  Usage:
 
-    my $prob = chi_squared_test(observed=>[...], expected=>[...]);
+    my ($chi_squared, $df) = chi_squared_test(observed=>[...], expected=>[...]);
 
 where the `observed` and `expected` arrays are the number of occurrences
 in each category.
 
-Written by [amon](https://stackoverflow.com/users/1521179/amon), posted
-[here](https://stackoverflow.com/a/21205042/2877364).
+As a shorthand for the common case of a fair die, you can pass a scalar for
+`expected`.  The `expected` array will then be filled with copies of that
+value equal in number to the size of the `observed` array.
+
+As yet another alternative, you can call
+
+    my ($chi_squared, $df) = chi_squared_test(generator=>sub { ... });
+
+where `generator`, when called, returns the next `($observed, $expected)`
+pair.  When the generator returns `undef`, the loop stops.
+
+Returns the chi-squared statistic.  In list context, also returns
+the number of degrees of freedom.
+
+Original version by [ Lukas
+Atkinson](https://stackoverflow.com/users/1521179/amon), posted
+[here](https://stackoverflow.com/a/21205042/2877364).  Modified by CXW.
+
+## chi\_squared\_test
+
+Return the probability that a given observed distribution was produced by a
+random process with the given expected distribution.  Parameters are as
+["chi\_squared"](#chi_squared).
+
+If I am reading Knuth correctly, a random sequence should generally have
+probabilities on the range (0.1, 0.9).  TAOCP 3e, vol. 2, p. 47.
+
+Original version by [ Lukas
+Atkinson](https://stackoverflow.com/users/1521179/amon), posted
+[here](https://stackoverflow.com/a/21205042/2877364).  Modified by CXW.
+
+## chi\_squared\_maybe\_ok
+
+Parameters as ["chi\_squared\_test"](#chi_squared_test).  Returns true iff the chi-squared result
+is in the range (0.1, 0.9).
 
 # SEE ALSO
 
@@ -79,3 +108,15 @@ YOUR LOCAL LAW. UNLESS REQUIRED BY LAW, NO COPYRIGHT HOLDER OR
 CONTRIBUTOR WILL BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, OR
 CONSEQUENTIAL DAMAGES ARISING IN ANY WAY OUT OF THE USE OF THE PACKAGE,
 EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+# POD ERRORS
+
+Hey! **The above document had some coding errors, which are explained below:**
+
+- Around line 72:
+
+    L<> starts or ends with whitespace
+
+- Around line 124:
+
+    L<> starts or ends with whitespace
