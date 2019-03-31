@@ -155,15 +155,26 @@ my %opts = (
         'strict' => '0',
         'warnings' => '0',
     },
-    BUILD_REQUIRES => {
+    #BUILD_REQUIRES => {
+    #},
+    TEST_REQUIRES => {
+        'Games::Dice' => '0.041',
+        'Games::Dice::Advanced' => '1.1',
+        #'Games::Dice::Probability' => '0',
+        'lib::relative' => '0.002',
         'Test::More' => '0',
+        'Test::Number::Delta' => '1.06',
     },
     PREREQ_PM => {
         'Carp' => '0',
         'Exporter' => '0',
         'List::Util' => '1.50',
         'parent' => '0',
+        #'Statistics::Descriptive' => '3.0700',
         'Statistics::Distributions' => '0.07',
+        #'Statistics::Test::RandomWalk' => '0.02',
+        #'Statistics::Test::Sequence' => '0.01',
+        #'Test::Probability' => '0.002',     # part of Games::Dice::Loaded
     },
 
     dist  => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },

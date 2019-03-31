@@ -51,10 +51,13 @@ listed below.
 
 =head2 chi_squared_test
 
-TODO Return the probability that a given distribution matches a specified
-distribution.  Usage:
+Return the probability that a given observed distribution was produced by a
+random process with the given expected distribution.  Usage:
 
     my $prob = chi_squared_test(observed=>[...], expected=>[...]);
+
+where the C<observed> and C<expected> arrays are the number of occurrences
+in each category.
 
 Written by L<amon|https://stackoverflow.com/users/1521179/amon>, posted
 L<here|https://stackoverflow.com/a/21205042/2877364>.
@@ -80,11 +83,30 @@ __END__
 
 # Rest of docs =========================================================== {{{1
 
+=head1 SEE ALSO
+
+=over
+
+=item *
+
+L<http://blogs.perl.org/users/ovid/2014/01/testing-random-dice-rolls.html>
+
+=item *
+
+L<https://www.nu42.com/2014/01/randomness-and-statistical-concepts.html>
+
+=item *
+
+L<http://oddgeek.info/code/gdp/>
+
+=back
+
 =head1 BUGS
 
 Please report any bugs or feature requests through the web interface at
-L<https://github.com/cxw42/Games-Dice-Tester>.  I will be notified, and then you'll
-automatically be notified of progress on your bug as I make changes.
+L<https://github.com/cxw42/Games-Dice-Tester/issues>.  I will be notified, and
+then you'll automatically be notified of progress on your bug as I make
+changes.
 
 =head1 SUPPORT
 

@@ -16,19 +16,31 @@ EXPORT
 
 FUNCTIONS
   chi_squared_test
-    TODO Return the probability that a given distribution matches a specified
-    distribution.  Usage:
+    Return the probability that a given observed distribution was produced by
+    a random process with the given expected distribution.  Usage:
 
         my $prob = chi_squared_test(observed=>[...], expected=>[...]);
+
+    where the "observed" and "expected" arrays are the number of occurrences
+    in each category.
 
     Written by amon <https://stackoverflow.com/users/1521179/amon>, posted
     here <https://stackoverflow.com/a/21205042/2877364>.
 
+SEE ALSO
+    *   <http://blogs.perl.org/users/ovid/2014/01/testing-random-dice-rolls.ht
+        ml>
+
+    *   <https://www.nu42.com/2014/01/randomness-and-statistical-concepts.html
+        >
+
+    *   <http://oddgeek.info/code/gdp/>
+
 BUGS
     Please report any bugs or feature requests through the web interface at
-    <https://github.com/cxw42/Games-Dice-Tester>.  I will be notified, and
-    then you'll automatically be notified of progress on your bug as I make
-    changes.
+    <https://github.com/cxw42/Games-Dice-Tester/issues>.  I will be notified,
+    and then you'll automatically be notified of progress on your bug as I
+    make changes.
 
 SUPPORT
     You can find documentation for this module with the perldoc command.
