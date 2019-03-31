@@ -10,7 +10,7 @@ our $VERSION = '0.000001';  # TRIAL
 our (@EXPORT, @EXPORT_OK, %EXPORT_TAGS);
 BEGIN {
     @EXPORT = ();
-    @EXPORT_OK = qw(chi_squared_test);
+    @EXPORT_OK = qw(chi_squared_test chi_squared_maybe_ok);
     %EXPORT_TAGS = (
         default => [@EXPORT],
         all => [@EXPORT, @EXPORT_OK]
@@ -59,8 +59,16 @@ random process with the given expected distribution.  Usage:
 where the C<observed> and C<expected> arrays are the number of occurrences
 in each category.
 
-Written by L<amon|https://stackoverflow.com/users/1521179/amon>, posted
-L<here|https://stackoverflow.com/a/21205042/2877364>.
+As a shorthand for the common case of a fair die, you can pass a scalar for
+C<expected>.  The C<expected> array will then be filled with copies of that
+value equal in number to the size of the C<observed> array.
+
+If I am reading Knuth correctly, a random sequence should generally have
+probabilities on the range (0.1, 0.9).  TAOCP 3e, vol. 2, p. 47.
+
+Original version by L< Lukas
+Atkinson|https://stackoverflow.com/users/1521179/amon>, posted
+L<here|https://stackoverflow.com/a/21205042/2877364>.  Modified by CXW.
 
 =cut
 
@@ -68,8 +76,14 @@ sub chi_squared_test {
   my %args = @_;
   my $observed = delete $args{observed} // croak q(Argument "observed" required);
   my $expected = delete $args{expected} // croak q(Argument "expected" required);
+
+  # Shorthand syntax for $expected
+  $expected = [($expected) x @$observed] unless ref $expected eq 'ARRAY';
+
+  # Validate parameters
   @$observed == @$expected or croak q(Input arrays must have same length);
 
+  # Do the work
   my $chi_squared = sum map {
     ($observed->[$_] - $expected->[$_])**2 / $expected->[$_];
   } 0 .. $#$observed;
@@ -77,6 +91,18 @@ sub chi_squared_test {
   my $probability = chisqrprob($degrees_of_freedom, $chi_squared);
   return $probability;
 } #chi_squared_test()
+
+=head2 chi_squared_maybe_ok
+
+Parameters as L</chi_squared_test>.  Returns true iff the chi-squared result
+is in the range (0.1, 0.9).
+
+=cut
+
+sub chi_squared_maybe_ok {
+    my $prob = chi_squared_test(@_);
+    return ($prob > 0.1) && ($prob < 0.9);
+}
 
 1; # End of Games::Dice::Tester
 __END__
